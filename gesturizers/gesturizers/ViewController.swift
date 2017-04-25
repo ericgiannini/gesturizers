@@ -10,48 +10,51 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    lazy private var leftGestureView: UIView = {
+    lazy private var gestureView: UIView = {
         
-        let leftGestureView = UIView()
-        leftGestureView.frame = CGRect(x: 40, y: 40, width: 200, height: 80)
-        leftGestureView.backgroundColor = .blue
-        leftGestureView.isUserInteractionEnabled = true
+        let gestureView = UIView()
+        gestureView.frame = CGRect(x: 40, y: 40, width: 200, height: 80)
+        gestureView.backgroundColor = .blue
+        gestureView.isUserInteractionEnabled = true
         
-        return leftGestureView
+        return gestureView
     }()
     
+    lazy private var panRecognizer: UIGestureRecognizer = {
+        
+        let panRecognizer: UIGestureRecognizer = UIPanGestureRecognizer(target: self, action:#selector(didTapPanGesture))
+        
+        return panRecognizer
+    }()
+    
+    lazy private var pinchRecognizer: UIGestureRecognizer = {
+        
+        let pinchRecognizer: UIGestureRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(didPinchGesture))
+        
+        return pinchRecognizer
+    }()
+    
+    lazy private var rotateRecognizer: UIGestureRecognizer = {
+        
+        let rotateRecognizer: UIGestureRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(didRotateGesture))
+        
+        return rotateRecognizer
+    }()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        let gestRecognizers: Array<UIGestureRecognizer> = [panRecognizer, pinchRecognizer, rotateRecognizer]
         
-        let panRecognizer: UIGestureRecognizer = UIPanGestureRecognizer(target: self, action:#selector(didTapPanGesture))
-        let pinchRecognizer: UIGestureRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(didPinchGesture))
-        let rotateRecognizer: UIGestureRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(didRotateGesture))
+        gestRecognizers.forEach(gestureView.addGestureRecognizer)
         
-        //        let imageView = UIImageView()
-        //        imageView.image = UIImage(named:"Tennis-Ball")
-        //        draggableView.addSubview(imageView)
+        gestRecognizers.forEach {$0.delegate = self}
         
-        leftGestureView.addGestureRecognizer(panRecognizer)
-        leftGestureView.addGestureRecognizer(pinchRecognizer)
-        leftGestureView.addGestureRecognizer(rotateRecognizer)
         
-        panRecognizer.delegate = self
-        pinchRecognizer.delegate = self
-        rotateRecognizer.delegate = self
-        
-        view.addSubview(leftGestureView)
-        
-        /*
-         
-         [panRecognizer, pinchRecognizer, rotateRecognizer].forEach {draggableView.addGestureRecognizer($0)}
-         
-         [panRecognizer, pinchRecognizer, rotateRecognizer].forEach {$0.delegate = self}
-         
-         */
+        view.addSubview(gestureView)
+    
         
     }
     
@@ -72,30 +75,51 @@ class ViewController: UIViewController {
             print("Transform: \(view.transform)")
             draggableView.center = CGPoint(x: draggableView.center.x + draggableTranslation.x, y: draggableView.center.y + draggableTranslation.y)
         }
-        print("Dragging : \(leftGestureView.center)")
+        print("Dragging : \(gestureView.center)")
         
         // after having programmed the draggableView, set the "draggability" to the recognizer
         
-        panRecognizer.setTranslation( CGPoint.zero, in: leftGestureView)
+        panRecognizer.setTranslation( CGPoint.zero, in: gestureView)
     }
     
     func didPinchGesture(pinchRecognizer : UIPinchGestureRecognizer) {
+        
+        /*
+         
+         Ensure view is set to the pinchRecognizer's view with optional binding; if not nil, set view's transform property to result of the scaledBy(:) method, which transforms the x & y coordinates to the pinched view (i.e., % of scale).
+         
+         */
+        
         if let view = pinchRecognizer.view {
             print("Center: \(view.center))")
             print("Transform: \(view.transform)")
             
             view.transform = view.transform.scaledBy(x: pinchRecognizer.scale, y: pinchRecognizer.scale)
             print("Pinch : \(pinchRecognizer.scale)")
+            
+            // reset the scale
             pinchRecognizer.scale = 1
         }
     }
     
     
     func didRotateGesture(rotateRecognizer: UIRotationGestureRecognizer) {
+        
+        /*
+         
+         Process identical to pinch; ensure view is set to the rotateRecognizer's view with optional binding; if not nil, set view's transform property to result of the rotate(by:) method, which transforms rotation to the rotated view (i.e., % of rotation).
+
+
+         */
+        
         if let view = rotateRecognizer.view {
             let rotation: CGFloat = rotateRecognizer.rotation
+            
             view.transform = view.transform.rotated(by: rotation)
+            
             print("Rotation : \(rotateRecognizer.rotation)")
+            
+            // reset the rotation
             rotateRecognizer.rotation = 0.0
         }
     }
@@ -109,6 +133,7 @@ class ViewController: UIViewController {
 }
 
 extension ViewController : UIGestureRecognizerDelegate {
+    // required delegate method for gestures without any customization
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
