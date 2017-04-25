@@ -12,6 +12,8 @@ class ViewController: UIViewController {
     
     lazy private var gestureView: UIView = {
         
+        
+        
         let gestureView = UIView()
         gestureView.frame = CGRect(x: 40, y: 40, width: 200, height: 80)
         gestureView.backgroundColor = .blue
@@ -49,8 +51,6 @@ class ViewController: UIViewController {
         [panRecognizer, pinchRecognizer, rotateRecognizer].forEach(gestureView.addGestureRecognizer)
         
         view.addSubview(gestureView)
-    
-        
     }
     
     
