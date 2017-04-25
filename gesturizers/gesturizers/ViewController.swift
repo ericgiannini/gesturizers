@@ -23,21 +23,21 @@ class ViewController: UIViewController {
     lazy private var panRecognizer: UIGestureRecognizer = {
         
         let panRecognizer: UIGestureRecognizer = UIPanGestureRecognizer(target: self, action:#selector(didTapPanGesture))
-        
+        panRecognizer.delegate = self
         return panRecognizer
     }()
     
     lazy private var pinchRecognizer: UIGestureRecognizer = {
         
         let pinchRecognizer: UIGestureRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(didPinchGesture))
-        
+        pinchRecognizer.delegate = self
         return pinchRecognizer
     }()
     
     lazy private var rotateRecognizer: UIGestureRecognizer = {
         
         let rotateRecognizer: UIGestureRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(didRotateGesture))
-        
+        rotateRecognizer.delegate = self
         return rotateRecognizer
     }()
     
@@ -46,12 +46,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let gestRecognizers: Array<UIGestureRecognizer> = [panRecognizer, pinchRecognizer, rotateRecognizer]
-        
-        gestRecognizers.forEach(gestureView.addGestureRecognizer)
-        
-        gestRecognizers.forEach {$0.delegate = self}
-        
+        [panRecognizer, pinchRecognizer, rotateRecognizer].forEach(gestureView.addGestureRecognizer)
         
         view.addSubview(gestureView)
     
